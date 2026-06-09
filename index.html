@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — Diagnóstico Bases ASABCs | Fenasbac TI · v3</title>
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#0225EB;--dark:#002060;--cyan:#02FFFF;--gray:#595959;
+  --light:#EEF2FF;--white:#FFFFFF;--border:#CCCCCC;--bg:#F5F7FF;
+  --green:#2EA043;--red:#F85149;--yellow:#D29922;--orange:#E67E22;
+  --font:'Exo 2',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--font);background:var(--bg);color:#1a1a2e;min-height:100vh;}
+
+/* HEADER */
+.header{background:var(--dark);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;border-bottom:3px solid var(--blue);}
+.logo-box{background:var(--blue);color:var(--cyan);font-weight:700;font-size:13px;letter-spacing:.1em;padding:6px 12px;border-radius:4px;}
+.h-title{font-size:16px;font-weight:600;color:var(--cyan);}
+.h-sub{font-size:11px;color:rgba(255,255,255,.55);margin-top:2px;}
+.h-date{font-size:11px;color:rgba(255,255,255,.35);}
+.h-badge{display:inline-block;margin-top:5px;padding:3px 12px;border-radius:20px;font-size:10px;font-weight:700;background:rgba(46,160,67,.2);border:1px solid rgba(46,160,67,.4);color:#6EE59B;}
+
+/* TABS */
+.tabs-bar{background:var(--white);border-bottom:1px solid var(--border);padding:0 28px;position:sticky;top:0;z-index:100;}
+.tabs{display:flex;overflow-x:auto;gap:0;}
+.tab{padding:13px 20px;cursor:pointer;font-size:12px;font-weight:400;color:var(--gray);border:none;background:none;font-family:var(--font);border-bottom:3px solid transparent;transition:all .18s;white-space:nowrap;}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:600;}
+.tab:hover:not(.active){color:var(--dark);border-bottom-color:var(--border);}
+
+/* WRAP */
+.wrap{max-width:1400px;margin:0 auto;padding:24px 28px 56px;}
+.panel{display:none;}
+.panel.active{display:block;animation:fadeUp .25s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* SECTION TITLE */
+.st{background:var(--blue);color:var(--white);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;padding:7px 14px;border-radius:4px;display:block;margin:24px 0 14px;}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:24px;}
+.kpi{background:var(--blue);border-radius:8px;padding:16px 18px;color:var(--white);border-bottom:2px solid var(--cyan);transition:transform .15s;}
+.kpi:hover{transform:translateY(-2px);}
+.kpi-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;opacity:.75;margin-bottom:6px;}
+.kpi-val{font-size:32px;font-weight:700;color:var(--cyan);line-height:1;}
+.kpi-sub{font-size:10px;opacity:.6;margin-top:4px;}
+.kpi.green{background:var(--green);border-bottom-color:rgba(255,255,255,.3);}
+.kpi.green .kpi-val{color:var(--white);}
+.kpi.red{background:var(--red);border-bottom-color:rgba(255,255,255,.3);}
+.kpi.red .kpi-val{color:var(--white);}
+.kpi.dark{background:var(--dark);}
+
+/* BOXES */
+.box-blue{background:#EFF6FF;border-left:4px solid var(--blue);border-radius:0 6px 6px 0;padding:12px 16px;margin-bottom:16px;font-size:12px;color:#1E3A5F;line-height:1.6;}
+.box-green{background:#F0FBF3;border-left:4px solid var(--green);border-radius:0 6px 6px 0;padding:12px 16px;margin-bottom:16px;font-size:12px;color:#155724;line-height:1.6;}
+.box-yellow{background:#FFFBEB;border-left:4px solid var(--yellow);border-radius:0 6px 6px 0;padding:12px 16px;margin-bottom:16px;font-size:12px;color:#78350F;line-height:1.6;}
+.box-red{background:#FEF2F2;border-left:4px solid var(--red);border-radius:0 6px 6px 0;padding:12px 16px;margin-bottom:16px;font-size:12px;color:#7F1D1D;line-height:1.6;}
+
+/* TABLE */
+.table-wrap{border:1px solid var(--border);border-radius:8px;overflow:hidden;overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:12px;background:var(--white);}
+thead th{background:var(--blue);color:var(--white);padding:10px 12px;text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;white-space:nowrap;}
+tbody tr{border-bottom:1px solid var(--border);transition:background .15s;}
+tbody tr:nth-child(even){background:var(--light);}
+tbody tr:hover{background:#E8ECFF;}
+tbody td{padding:10px 12px;color:var(--dark);vertical-align:middle;line-height:1.4;}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;}
+.badge.green{background:#D4EDDA;color:#155724;}
+.badge.yellow{background:#FFF3CD;color:#856404;}
+.badge.orange{background:#FFE0CC;color:#7C3000;}
+.badge.red{background:#FCE4D6;color:#8B1A1A;}
+.badge.blue{background:#D0E8FF;color:#0D3B80;}
+.badge.gray{background:#F0F0F0;color:var(--gray);}
+.badge.poc{background:var(--dark);color:var(--cyan);}
+
+/* CARDS REGIONAIS */
+.regional-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:12px;}
+.rcard{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:16px 18px;border-top:3px solid var(--blue);transition:box-shadow .2s,transform .2s;}
+.rcard:hover{box-shadow:0 4px 20px rgba(2,37,235,.1);transform:translateY(-2px);}
+.rcard.ok{border-top-color:var(--green);}
+.rcard.warn{border-top-color:var(--yellow);}
+.rcard.alert{border-top-color:var(--red);}
+.rcard-name{font-size:16px;font-weight:700;color:var(--dark);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
+.rcard-meta{font-size:11px;color:var(--gray);margin-bottom:8px;}
+.pb{height:5px;background:var(--light);border-radius:3px;margin-bottom:10px;overflow:hidden;}
+.pbf{height:100%;border-radius:3px;transition:width 1.2s cubic-bezier(.4,0,.2,1);}
+.rcard-body{font-size:11px;color:var(--gray);line-height:1.6;margin-bottom:10px;}
+.tags{display:flex;flex-wrap:wrap;gap:4px;}
+.tag{font-size:10px;padding:2px 8px;border-radius:4px;font-weight:500;}
+.tag.ok{background:#D4EDDA;color:#155724;}
+.tag.warn{background:#FFF3CD;color:#856404;}
+.tag.alert{background:#FCE4D6;color:#8B1A1A;}
+.tag.info{background:var(--light);color:var(--blue);}
+.tag.gray{background:#F0F0F0;color:var(--gray);}
+
+/* HEAT MAP */
+.heat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;}
+.hcard{border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:8px;}
+.hcard .rank{font-size:28px;font-weight:700;opacity:.4;line-height:1;}
+.hcard .name{font-size:15px;font-weight:700;color:#FFFFFF;}
+.hcard .level{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.95);}
+.hcard .note{font-size:11px;color:rgba(255,255,255,.95);line-height:1.6;}
+.hcard.h5{background:#1a7a32;}
+.hcard.h3{background:#7a5c00;}
+.hcard.h2{background:#7a3800;}
+.hcard.h1{background:#8b1a1a;}
+.hcard.h0{background:#5a0a0a;}
+
+/* COMP BARS */
+.comp-bar{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.comp-track{flex:1;height:6px;background:var(--light);border-radius:3px;overflow:hidden;}
+.comp-fill{height:100%;border-radius:3px;}
+.comp-label{font-size:10px;font-weight:600;min-width:36px;text-align:right;}
+
+/* QUAL ROW */
+.qual-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.qual-label{font-size:10px;color:var(--gray);min-width:90px;}
+.qual-track{flex:1;height:6px;background:var(--light);border-radius:3px;overflow:hidden;}
+.qual-bar{height:100%;border-radius:3px;}
+.qual-val{font-size:10px;font-weight:600;min-width:56px;text-align:right;}
+
+/* REC CARDS */
+.rec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;}
+.rec-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:18px 20px;}
+.rec-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.rec-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.rec-title{font-size:13px;font-weight:700;color:var(--dark);}
+.rec-period{font-size:10px;color:var(--gray);}
+.rec-list{list-style:none;display:flex;flex-direction:column;gap:7px;}
+.rec-list li{font-size:11px;color:var(--gray);line-height:1.5;padding-left:14px;position:relative;}
+.rec-list li::before{content:"→";position:absolute;left:0;color:var(--blue);font-weight:700;}
+
+/* FOOTER */
+.page-footer{background:var(--dark);padding:12px 28px;margin-top:48px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-top:2px solid var(--blue);}
+.page-footer span{font-size:10px;color:var(--gray);}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-thumb{background:var(--blue);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div style="display:flex;align-items:center;gap:14px;">
+    <div class="logo-box">FENASBAC</div>
+    <div>
+      <div class="h-title">Diagnóstico de Bases de Dados — Rede ASBAC</div>
+      <div class="h-sub">Programa 60 Anos · Fenasbac Conecta & Clube F · Coordenação de TI · v3</div>
+    </div>
+  </div>
+  <div style="text-align:right;">
+    <div class="h-date">09 de Junho de 2026 · v4.0</div>
+    <span class="h-badge">Lançamento Clube F: 11/06/2026 — Reunião do Conselho</span>
+  </div>
+</header>
+
+<div class="tabs-bar">
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('visao',this)">Visão Geral</button>
+    <button class="tab" onclick="showTab('regionais',this)">Regionais</button>
+    <button class="tab" onclick="showTab('maturidade',this)">Maturidade</button>
+    <button class="tab" onclick="showTab('completude',this)">Completude</button>
+    <button class="tab" onclick="showTab('complexidades',this)">Complexidades</button>
+    <button class="tab" onclick="showTab('recomendacoes',this)">Recomendações</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- ══ VISÃO GERAL ══ -->
+<div class="panel active" id="panel-visao">
+  <div class="box-blue"><strong>Brasília e Rio de Janeiro</strong> foram as <strong>pioneiras da PoC (fev/2026)</strong> — validaram o modelo federativo antes da expansão para toda a rede. Elas são destacadas neste relatório com uma seção própria logo abaixo. O processo formal (abr–jun/2026) acompanhou as demais <strong>8 regionais</strong>, cujo panorama está consolidado na tabela a seguir.</div>
+
+  <div class="kpi-grid">
+    <div class="kpi dark"><div class="kpi-label">Regionais</div><div class="kpi-val">8</div><div class="kpi-sub">Processo formal abr–jun/2026</div></div>
+    <div class="kpi green"><div class="kpi-label">Concluídas</div><div class="kpi-val">7</div><div class="kpi-sub">POA · REC · BEL · FOR · SP · CWB · BH</div></div>
+    <div class="kpi red"><div class="kpi-label">Pendente</div><div class="kpi-val">1</div><div class="kpi-sub">Salvador — sistema terceirizado</div></div>
+    <div class="kpi" style="background:var(--dark);border-bottom-color:var(--cyan)"><div class="kpi-label" style="color:var(--cyan)">Pioneiras PoC</div><div class="kpi-val" style="color:var(--cyan)">2</div><div class="kpi-sub">Brasília · Rio de Janeiro (fev/2026)</div></div>
+  </div>
+
+
+
+
+    <span class="st">Panorama Executivo — 8 Regionais do Processo Formal</span>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Regional</th><th>Status</th><th>Registros</th><th>E-mail %</th><th>Maturidade</th><th>Situação Atual — 09/06/2026</th></tr></thead>
+      <tbody>
+        <tr><td><strong>1</strong></td><td><strong>Porto Alegre</strong></td><td><span class="badge green">Concluída</span></td><td>Base completa (CPF/e-mail 100%)</td><td style="color:var(--green);font-weight:700;text-align:center">100%</td><td><span class="badge green">Alta</span></td><td>Referência técnica. 100% completude. Dependentes estruturados.</td></tr>
+        <tr><td><strong>2</strong></td><td><strong>Recife</strong></td><td><span class="badge green">Concluída</span></td><td>Vigentes confirmados</td><td style="text-align:center">n/d</td><td><span class="badge yellow">Média</span></td><td>Modelo padrão adotado. Todos os registros vigentes.</td></tr>
+        <tr><td><strong>3</strong></td><td><strong>Belém</strong></td><td><span class="badge green">Concluída</span></td><td>Integrados</td><td style="text-align:center">n/d</td><td><span class="badge yellow">Média</span></td><td>Inconsistência corrigida. Modelo padrão seguido.</td></tr>
+        <tr><td><strong>4</strong></td><td><strong>Fortaleza</strong></td><td><span class="badge green">Concluída</span></td><td>109 sócios ativos</td><td style="color:var(--red);font-weight:700;text-align:center">23,9%</td><td><span class="badge orange">Baixa-Média</span></td><td>CPF 0%. Fenasbac tem mais dados do que a regional.</td></tr>
+        <tr><td><strong>5</strong></td><td><strong>São Paulo</strong></td><td><span class="badge green">Concluída</span></td><td>Sócios efetivos (01/06)</td><td style="text-align:center">n/d</td><td><span class="badge yellow">Média</span></td><td>Base completa recebida e integrada em 01/06.</td></tr>
+        <tr><td><strong>6</strong></td><td><strong>Curitiba</strong></td><td><span class="badge green">Concluída</span></td><td>Sócios + frequentadores (2 bases)</td><td style="text-align:center">85–87%</td><td><span class="badge yellow">Média</span></td><td>Freq. recebidos 03/06. Complexidade assumida pela Fenasbac.</td></tr>
+        <tr><td><strong>7</strong></td><td><strong>Belo Horizonte</strong></td><td><span class="badge green">Concluída</span></td><td>Mínimo (4 campos)</td><td style="text-align:center">Presente</td><td><span class="badge red">Baixa</span></td><td>Integração mínima via e-mail. Complementação pendente.</td></tr>
+        <tr><td><strong>8</strong></td><td><strong>Salvador</strong></td><td><span class="badge red">Pendente</span></td><td>Não entregues</td><td style="text-align:center">n/a</td><td><span class="badge red">Muito Baixa</span></td><td>Sistema sem exportação nativa. Prazo indefinido.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <span class="st">Percepção Estratégica</span>
+  <div class="box-green"><strong>Inversão de fluxo:</strong> A Fenasbac possui, em vários casos, mais dados sobre os associados das ASBACs no Conecta do que as próprias regionais em suas bases locais. O Conecta pode evoluir como repositório federativo centralizando e enriquecendo dados que as regionais não conseguem manter por conta própria.</div>
+  <div class="box-yellow"><strong>Padrão predominante:</strong> Gestão 100% manual por planilhas Excel. Nenhuma regional identificada com CRM ou ERP dedicado em pleno funcionamento. A heterogeneidade de maturidade é o principal desafio para a visão federativa integrada.</div>
+  <div class="box-red"><strong>Salvador — decisão necessária:</strong> Única regional com dados não entregues. Bloqueio sistêmico pelo fornecedor terceirizado. Ações internas da regional ainda não iniciadas. Necessária decisão institucional da Fenasbac.</div>
+</div>
+
+<!-- ══ REGIONAIS ══ -->
+<div class="panel" id="panel-regionais">
+
+  <div class="box-blue" style="border-left-color:var(--cyan);margin-bottom:16px"><strong>Brasília e Rio de Janeiro — Pioneiras da PoC (fev/2026):</strong> Antes do processo formal, essas duas regionais validaram o modelo federativo de integração ao Fenasbac Conecta. Integração estável desde fevereiro/2026. São tratadas separadamente das 8 regionais do processo formal e apresentadas com destaque abaixo.</div>
+  <div class="regional-grid" style="margin-bottom:24px">
+
+    <div class="rcard" style="border-top-color:var(--cyan);background:linear-gradient(135deg,#EFF6FF 0%,var(--white) 100%)">
+      <div class="rcard-name">Brasília <span class="badge poc">PoC fev/2026</span></div>
+      <div class="rcard-meta">Pioneira — integração desde fev/2026 · Modelo federativo validado</div>
+      <div class="pb"><div class="pbf" style="width:95%;background:var(--blue)"></div></div>
+      <div class="rcard-body">Primeira regional integrada ao Fenasbac Conecta. Validou o modelo federativo, a governança por regional e o fluxo de importação CSV antes da expansão para toda a rede. Integração estável. Atualização cadastral recomendada (4+ meses desde a carga inicial).</div>
+      <div class="tags">
+        <span class="tag poc" style="background:#E8F0FF;color:var(--dark)">Pioneira PoC</span>
+        <span class="tag ok">Integração estável</span>
+        <span class="tag warn">Atualização recomendada</span>
+      </div>
+    </div>
+
+    <div class="rcard" style="border-top-color:var(--cyan);background:linear-gradient(135deg,#EFF6FF 0%,var(--white) 100%)">
+      <div class="rcard-name">Rio de Janeiro <span class="badge poc">PoC fev/2026</span></div>
+      <div class="rcard-meta">Pioneira — integração desde fev/2026 · Evento 60 Anos: 17/09 (Comary)</div>
+      <div class="pb"><div class="pbf" style="width:95%;background:var(--blue)"></div></div>
+      <div class="rcard-body">Segunda regional integrada na PoC. Co-validou o modelo com múltiplas bases simultâneas, demonstrando escalabilidade da solução. Integração estável. Evento 60 Anos confirmado para setembro — atualização da base prioritária antes da data.</div>
+      <div class="tags">
+        <span class="tag poc" style="background:#E8F0FF;color:var(--dark)">Pioneira PoC</span>
+        <span class="tag ok">Integração estável</span>
+        <span class="tag info">Evento 17/09 — Comary</span>
+        <span class="tag warn">Atualizar antes do evento</span>
+      </div>
+    </div>
+
+  </div>
+  <span class="st">8 Regionais — Processo Formal (abr–jun/2026)</span>
+  <div class="box-blue" style="display:none">Detalhamento das 8 regionais do processo formal (abr–jun/2026). Brasília e Rio de Janeiro foram integradas na PoC de fevereiro/2026 e constam no histórico, mas não fazem parte deste processo formal.</div>
+
+  <div class="regional-grid">
+
+    <div class="rcard ok">
+      <div class="rcard-name">Porto Alegre <span class="badge green">Referência</span></div>
+      <div class="rcard-meta">CPF/E-mail 100% · Telefone 6,9% · Referência técnica</div>
+      <div class="pb"><div class="pbf" style="width:100%;background:var(--green)"></div></div>
+      <div class="rcard-body">Base com 100% nos campos principais. Categorias diversas. Todos ativos confirmados (Angelita, 27/05). Única lacuna: telefone 6,9%. Dep. recebidos — pendente mapeamento.</div>
+      <div class="tags">
+        <span class="tag ok">100% completude</span>
+        <span class="tag info">Dep. recebidos — pendente integração</span>
+        <span class="tag ok">Ativos confirmados</span>
+        <span class="tag warn">Sócios não contribuintes — definir tratamento</span>
+      </div>
+    </div>
+
+    <div class="rcard ok">
+      <div class="rcard-name">Recife <span class="badge green">Concluída</span></div>
+      <div class="rcard-meta">Todos vigentes · CPF 92,7% · E-mail 89,1% · Celular 89,8%</div>
+      <div class="pb"><div class="pbf" style="width:88%;background:var(--green)"></div></div>
+      <div class="rcard-body">Todos vigentes confirmados (Vaneide, 26/05). Categorias diversas. CPF 92,7%, e-mail 89,1%, celular 89,8%. Telefone fixo 52,6%.</div>
+      <div class="tags">
+        <span class="tag ok">Vigentes confirmados</span>
+        <span class="tag ok">Modelo padrão</span>
+        <span class="tag ok">SNAPSHOT criado</span>
+      </div>
+    </div>
+
+    <div class="rcard ok">
+      <div class="rcard-name">Belém <span class="badge green">Concluída</span></div>
+      <div class="rcard-meta">Planilha corrigida recebida 26/05 · Modelo padrão seguido</div>
+      <div class="pb"><div class="pbf" style="width:82%;background:var(--green)"></div></div>
+      <div class="rcard-body">Primeira versão com inconsistência entre abas. Regional corrigiu e reenviou no modelo padrão, sem necessidade de alteração no código de importação.</div>
+      <div class="tags">
+        <span class="tag ok">Corrigiu inconsistência</span>
+        <span class="tag ok">Modelo padrão</span>
+        <span class="tag ok">SNAPSHOT criado</span>
+      </div>
+    </div>
+
+    <div class="rcard warn">
+      <div class="rcard-name">Fortaleza <span class="badge orange">Baixa completude</span></div>
+      <div class="rcard-meta">CPF 0% · E-mail 23,9% · Matrícula 100%</div>
+      <div class="pb"><div class="pbf" style="width:42%;background:var(--orange)"></div></div>
+      <div class="rcard-body">E-mail em 23,9% e CPF ausente em 100% dos registros. A Fenasbac possui mais dados desses associados no Conecta do que a própria regional. Integração viabilizada pela chave matrícula.</div>
+      <div class="tags">
+        <span class="tag alert">E-mail 23,9%</span>
+        <span class="tag alert">CPF 0%</span>
+        <span class="tag ok">Matrícula 100%</span>
+        <span class="tag ok">SNAPSHOT criado</span>
+      </div>
+    </div>
+
+    <div class="rcard ok">
+      <div class="rcard-name">São Paulo <span class="badge green">Concluída</span></div>
+      <div class="rcard-meta">Efetivos (5 abas) + frequentadores integrados</div>
+      <div class="pb"><div class="pbf" style="width:75%;background:var(--green)"></div></div>
+      <div class="rcard-body">Efetivos em múltiplas abas (ASSOCIADOS, APOSENTADOS, PENSIONISTAS, CENTRUS, ATIVOS) + frequentadores (Social + Náutico). Aposentados: e-mail 97,8%. Frequentadores: CPF 100%. Abas ASSOCIADOS e ATIVOS sem e-mail e CPF.</div>
+      <div class="tags">
+        <span class="tag ok">Aposentados: e-mail 97,8%</span>
+        <span class="tag ok">Freq.: CPF 100%</span>
+        <span class="tag warn">Abas ASSOCIADOS/ATIVOS sem CPF</span>
+        <span class="tag info">Modelo padrão no Jira (Wesley)</span>
+      </div>
+    </div>
+
+    <div class="rcard ok">
+      <div class="rcard-name">Curitiba <span class="badge green">Concluída</span></div>
+      <div class="rcard-meta">Sócios CPF 77,1% · Frequentadores CPF 84,4%</div>
+      <div class="pb"><div class="pbf" style="width:70%;background:var(--green)"></div></div>
+      <div class="rcard-body">Sócios (96): Aposentado (78), Ativo Bacen (8), Pensionista (5), Centrus (4). CPF 77,1%, e-mail 85,4%. Frequentadores (45): sem matrícula, CPF 84,4%, e-mail 86,7%. Wesley juntou as bases em padrão de fácil importação (CONECTA-33, 03/06). Sócios com categorias: Aposentado, Ativo Bacen, Pensionista Bacen, Centrus.</div>
+      <div class="tags">
+        <span class="tag ok">Integração finalizada</span>
+        <span class="tag warn">CPF 77–84%</span>
+        <span class="tag alert">Matrícula ausente (freq.)</span>
+        <span class="tag info">Modelo Drive + Jira</span>
+      </div>
+    </div>
+
+    <div class="rcard warn">
+      <div class="rcard-name">Belo Horizonte <span class="badge orange">Dados mínimos</span></div>
+      <div class="rcard-meta">Apenas 4 campos · Retorno 01/06 · Complementação pendente</div>
+      <div class="pb"><div class="pbf" style="width:36%;background:var(--orange)"></div></div>
+      <div class="rcard-body">Planilha com apenas nome, e-mail, sexo e matrícula. Integração viabilizada pela chave e-mail. CPF, endereço, telefone, data nasc. e categoria ausentes. Complementação solicitada sem retorno.</div>
+      <div class="tags">
+        <span class="tag warn">4 campos apenas</span>
+        <span class="tag alert">CPF ausente</span>
+        <span class="tag info">Chave: e-mail</span>
+        <span class="tag ok">SNAPSHOT criado</span>
+      </div>
+    </div>
+
+    <div class="rcard alert">
+      <div class="rcard-name">Salvador <span class="badge red">Pendente ⚠</span></div>
+      <div class="rcard-meta">Sistema sem exportação nativa · Prazo indefinido</div>
+      <div class="pb"><div class="pbf" style="width:10%;background:var(--red)"></div></div>
+      <div class="rcard-body" style="color:var(--red)"><strong>Sistema sem exportação nativa.</strong> Base desestruturada — extração seletiva tecnicamente inviável. Contratação de desenvolvedor e saneamento da base ainda não iniciados. Necessária decisão institucional da Fenasbac.</div>
+      <div class="tags">
+        <span class="tag alert">Dados NÃO entregues</span>
+        <span class="tag alert">Sistema sem exportação</span>
+        <span class="tag alert">Prazo indefinido</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ MATURIDADE ══ -->
+<div class="panel" id="panel-maturidade">
+  <div class="box-blue">Classificação comparativa de <strong>todas as 10 regionais da rede</strong> — Brasília e Rio de Janeiro como pioneiras da PoC (fev/2026) nos postos 1 e 2, seguidas pelas 8 regionais do processo formal (abr–jun/2026). Visão completa do estado de maturidade digital da rede ASBAC.</div>
+
+  <span class="st">Mapa de Calor — Maturidade Digital</span>
+  <div class="heat-grid">
+    <div class="hcard h5" style="position:relative">
+      <span style="position:absolute;top:10px;right:10px;background:var(--dark);color:var(--cyan);font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;letter-spacing:.05em">PoC</span>
+      <div class="rank">1</div>
+      <div class="name">Brasília</div>
+      <div class="level">Alta Maturidade</div>
+      <div class="note">Pioneira da PoC. Integração desde fev/2026 sem impedimentos. Alta aderência ao modelo federativo.</div>
+      <div style="margin-top:8px;padding:6px 8px;background:rgba(255,255,255,.15);border-radius:5px;font-size:9px;color:rgba(255,255,255,.85);line-height:1.5"><strong>Complexidade:</strong> Baixa. Formato fichas individuais (.xls) — requer transformação para atualização futura. CPF e e-mail 100%.</div>
+    </div>
+    <div class="hcard h5" style="position:relative">
+      <span style="position:absolute;top:10px;right:10px;background:var(--dark);color:var(--cyan);font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;letter-spacing:.05em">PoC</span>
+      <div class="rank">2</div>
+      <div class="name">Rio de Janeiro</div>
+      <div class="level">Alta Maturidade</div>
+      <div class="note">Co-validou o modelo federativo. Melhor estrutura tabular da rede. Evento 60 Anos em setembro.</div>
+      <div style="margin-top:8px;padding:6px 8px;background:rgba(255,255,255,.15);border-radius:5px;font-size:9px;color:rgba(255,255,255,.85);line-height:1.5"><strong>Complexidade:</strong> Baixa. CPF 100%, e-mail 93,2%. Categorias estruturadas. Atualização recomendada antes do evento 17/09.</div>
+    </div>
+    <div class="hcard h5">
+      <div class="rank">3</div>
+      <div class="name">Porto Alegre</div>
+      <div class="level">Alta Maturidade</div>
+      <div class="note">CPF e e-mail 100% nos campos principais. Todos os registros ativos confirmados. Adotou modelo padrão sem alteração no código.</div>
+      <div style="margin-top:8px;padding:6px 8px;background:rgba(255,255,255,.15);border-radius:5px;font-size:9px;color:rgba(255,255,255,.85);line-height:1.5"><strong>Complexidade:</strong> Baixa. Dependentes recebidos — pendente mapeamento. Telefone 6,9%.</div>
+    </div>
+    <div class="hcard h3">
+      <div class="rank">4</div>
+      <div class="name">Recife</div>
+      <div class="level">Média Maturidade</div>
+      <div class="note">CPF e e-mail com boa completude. Todos vigentes confirmados. Resposta ágil. Modelo padrão adotado sem atrito.</div>
+      <div style="margin-top:8px;padding:6px 8px;background:rgba(255,255,255,.15);border-radius:5px;font-size:9px;color:rgba(255,255,255,.85);line-height:1.5"><strong>Complexidade:</strong> Baixa. Matrícula ausente em parte dos registros. Telefone fixo 52,6%.</div>
+    </div>
+    <div class="hcard h3">
+      <div class="rank">5</div>
+      <div class="name">Belém</div>
+      <div class="level">Média Maturidade</div>
+      <div class="note">Inconsistência entre abas corrigida prontamente. Reenvio no modelo padrão sem necessidade de alteração no código.</div>
+      <div style="margin-top:8px;padding:6px 8px;background:rgba(255,255,255,.15);border-radius:5px;font-size:9px;color:rgba(255,255,255,.85);line-height:1.5"><strong>Complexidade:</strong> Moderada. Primeira versão com estrutura confusa e sem cabeçalhos — precisou de retrabalho.</div>
+    </div>
+    <div class="hcard h3">
+      <div class="rank">6</div>
+      <div class="name">São Paulo</div>
+      <div class="level">Média Maturidade</div>
+      <div class="note">Engajamento presente. Base integrada em etapas. Aposentados com e-mail bem preenchido. Frequentadores com CPF completo.</div>
+      <div style="margin-top:8px;padding:6px 8px;background:rgba(255,255,255,.15);border-radius:5px;font-size:9px;color:rgba(255,255,255,.85);line-height:1.5"><strong>Complexidade:</strong> Elevada. Planilha em múltiplas abas fora do padrão. Abas de ativos sem e-mail e CPF. Chegou em etapas — primeira lista só com frequentadores.</div>
+    </div>
+    <div class="hcard h3">
+      <div class="rank">7</div>
+      <div class="name">Curitiba</div>
+      <div class="level">Média Maturidade</div>
+      <div class="note">Duas bases entregues. CPF parcial nos sócios. Matrícula ausente nos frequentadores.</div>
+      <div style="margin-top:8px;padding:6px 8px;background:rgba(255,255,255,.15);border-radius:5px;font-size:9px;color:rgba(255,255,255,.85);line-height:1.5"><strong>Complexidade:</strong> Elevada. Planilha de frequentadores fora do padrão mínimo — TI assumiu junção e transformação dos dados (CONECTA-33).</div>
+    </div>
+    <div class="hcard h2">
+      <div class="rank">8</div>
+      <div class="name">Fortaleza</div>
+      <div class="level">Baixa-Média</div>
+      <div class="note">Matrícula 100% — única chave confiável. E-mail e CPF com completude muito baixa ou ausente. Devolutiva sem retorno.</div>
+      <div style="margin-top:8px;padding:6px 8px;background:rgba(255,255,255,.15);border-radius:5px;font-size:9px;color:rgba(255,255,255,.85);line-height:1.5"><strong>Complexidade:</strong> Moderada. CPF 0%, e-mail 23,9% — comunicação digital limitada. Fenasbac possui mais dados desses associados do que a própria regional.</div>
+    </div>
+    <div class="hcard h1">
+      <div class="rank">9</div>
+      <div class="name">Belo Horizonte</div>
+      <div class="level">Baixa Maturidade</div>
+      <div class="note">Apenas 4 campos enviados. Sem CPF. Integração mínima viabilizada pela chave e-mail. Engajamento tardio.</div>
+      <div style="margin-top:8px;padding:6px 8px;background:rgba(255,255,255,.15);border-radius:5px;font-size:9px;color:rgba(255,255,255,.85);line-height:1.5"><strong>Complexidade:</strong> Moderada. Complementação de dados solicitada em 01/06 sem retorno. 6+ campos obrigatórios ausentes.</div>
+    </div>
+    <div class="hcard h0">
+      <div class="rank">10</div>
+      <div class="name">Salvador</div>
+      <div class="level">Muito Baixa — Bloqueio Sistêmico</div>
+      <div class="note">Nenhum dado entregue. Sistema terceirizado sem exportação nativa. Base desestruturada. Ações internas não iniciadas.</div>
+      <div style="margin-top:8px;padding:6px 8px;background:rgba(0,0,0,.25);border-radius:5px;font-size:9px;color:rgba(255,255,255,.85);line-height:1.5"><strong>Complexidade:</strong> Muito Elevada. Única regional com bloqueio total. Necessária decisão institucional da Fenasbac para destravar.</div>
+    </div>
+  </div>
+
+  <span class="st">Ranking Detalhado</span>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Regional</th><th>Maturidade</th><th>Justificativa</th><th>Esforço</th><th>Potencial</th></tr></thead>
+      <tbody>
+        <tr><td><strong>1</strong></td><td><strong>Porto Alegre</strong></td><td><span class="badge green">Alta</span></td><td>CPF/e-mail 100% nos campos principais. Dep. recebidos pendente mapeamento. Modelo padrão. Ativos confirmados.</td><td><span class="badge green">Reduzido</span></td><td><span class="badge blue">Alto</span></td></tr>
+        <tr><td><strong>2</strong></td><td><strong>Recife</strong></td><td><span class="badge yellow">Média</span></td><td>CPF 92,7%, e-mail 89,1%, celular 89,8%. Todos vigentes confirmados.</td><td><span class="badge green">Reduzido</span></td><td><span class="badge yellow">Médio</span></td></tr>
+        <tr><td><strong>3</strong></td><td><strong>Belém</strong></td><td><span class="badge yellow">Média</span></td><td>Corrigiu inconsistência prontamente e adotou modelo padrão no reenvio.</td><td><span class="badge yellow">Moderado</span></td><td><span class="badge yellow">Médio</span></td></tr>
+        <tr><td><strong>4</strong></td><td><strong>São Paulo</strong></td><td><span class="badge yellow">Média</span></td><td>Base completa integrada 01/06. Estrutura mais complexa do que esperado.</td><td><span class="badge red">Elevado</span></td><td><span class="badge blue">Alto</span></td></tr>
+        <tr><td><strong>5</strong></td><td><strong>Curitiba</strong></td><td><span class="badge yellow">Média</span></td><td>Duas bases integradas. CPF parcial. Matrícula ausente nos frequentadores.</td><td><span class="badge red">Elevado</span></td><td><span class="badge yellow">Médio</span></td></tr>
+        <tr><td><strong>6</strong></td><td><strong>Fortaleza</strong></td><td><span class="badge orange">Baixa-Média</span></td><td>CPF 0%, e-mail 23,9%, Data Nasc. 20,2%. Matrícula 100% como única chave.</td><td><span class="badge yellow">Moderado</span></td><td><span class="badge yellow">Médio</span></td></tr>
+        <tr><td><strong>7</strong></td><td><strong>Belo Horizonte</strong></td><td><span class="badge red">Baixa</span></td><td>CPF 0%. Integração mínima via e-mail (Wesley, CONECTA-29). Complementação sem retorno.</td><td><span class="badge yellow">Moderado</span></td><td><span class="badge yellow">Médio</span></td></tr>
+        <tr><td><strong>8</strong></td><td><strong>Salvador</strong></td><td><span class="badge red">Muito Baixa</span></td><td>Sistema terceirizado sem exportação. Ações internas não iniciadas (02/06).</td><td><span class="badge red">Elevado</span></td><td><span class="badge yellow">Médio</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ COMPLETUDE ══ -->
+<div class="panel" id="panel-completude">
+  <div class="box-blue">Análise de completude de <strong>todas as 10 regionais da rede</strong> — 8 do processo formal (abr–jun/2026) + Brasília e Rio de Janeiro, <strong>pioneiras da PoC (fev/2026)</strong>, que já estão com integração estável no Conecta e são tratadas em destaque no início desta seção.</div>
+  <span class="st">Pioneiras da PoC — Dados das Planilhas Originais</span>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin-bottom:24px">
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:10px;padding:18px 20px;border-top:3px solid var(--cyan)">
+      <div style="font-weight:700;font-size:13px;color:var(--dark);margin-bottom:4px">Rio de Janeiro <span class="badge poc" style="margin-left:6px">PoC fev/2026</span></div>
+      <div style="font-size:10px;color:var(--gray);margin-bottom:14px">Melhor estrutura tabular da rede</div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">Nome</span><div class="comp-track"><div class="comp-fill" style="width:100%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">100%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">CPF</span><div class="comp-track"><div class="comp-fill" style="width:100%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">100%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">E-mail</span><div class="comp-track"><div class="comp-fill" style="width:93%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">93,2%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">Categoria</span><div class="comp-track"><div class="comp-fill" style="width:100%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">100%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">Matrícula</span><div class="comp-track"><div class="comp-fill" style="width:100%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">100%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">Telefones</span><div class="comp-track"><div class="comp-fill" style="width:70%;background:var(--yellow)"></div></div><span class="comp-label" style="color:var(--yellow)">Parcial</span></div>
+      <div style="margin-top:10px;padding:8px 10px;background:var(--light);border-radius:6px;font-size:10px;color:var(--gray);font-style:italic">Categorias estruturadas. Endereço, bairro, cidade e UF presentes. 13 colunas organizadas.</div>
+    </div>
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:10px;padding:18px 20px;border-top:3px solid var(--cyan)">
+      <div style="font-weight:700;font-size:13px;color:var(--dark);margin-bottom:4px">Brasília <span class="badge poc" style="margin-left:6px">PoC fev/2026</span></div>
+      <div style="font-size:10px;color:var(--gray);margin-bottom:14px">Formato fichas individuais (.xls)</div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">Nome</span><div class="comp-track"><div class="comp-fill" style="width:100%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">100%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">CPF</span><div class="comp-track"><div class="comp-fill" style="width:100%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">100%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">E-mail</span><div class="comp-track"><div class="comp-fill" style="width:100%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">100%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">Celular</span><div class="comp-track"><div class="comp-fill" style="width:100%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">100%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">Status</span><div class="comp-track"><div class="comp-fill" style="width:100%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">100%</span></div>
+      <div style="margin-top:10px;padding:8px 10px;background:#FFFBEB;border-radius:6px;font-size:10px;color:#78350F;font-style:italic">⚠ Formato de fichas individuais — cada titular ocupa múltiplas linhas no .xls. Requer transformação para formato tabular antes de qualquer atualização/reimportação.</div>
+    </div>
+  </div>
+  <span class="st">Bases com dados quantitativos — Processo Formal</span>
+  <div class="box-blue"><strong>Legenda:</strong> Barras com percentual real = bases analisadas via Python/pandas (Porto Alegre, Curitiba sócios, Curitiba frequentadores, Fortaleza). Indicadores qualitativos (✓ Presente / ~ Parcial / ✗ Ausente / — n/d) = demais regionais, baseados em devolutivas e registros do processo.</div>
+
+  <span class="st">Bases com dados quantitativos</span>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin-bottom:24px;">
+
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:10px;padding:18px 20px;border-top:3px solid var(--green)">
+      <div style="font-weight:700;font-size:13px;color:var(--dark);margin-bottom:4px">Porto Alegre <span class="badge green" style="margin-left:6px">Referência</span></div>
+      <div style="font-size:10px;color:var(--gray);margin-bottom:14px">CPF/e-mail 100% · Dep. pendente mapeamento</div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">Nome</span><div class="comp-track"><div class="comp-fill" style="width:100%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">100%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">CPF</span><div class="comp-track"><div class="comp-fill" style="width:100%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">100%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">E-mail</span><div class="comp-track"><div class="comp-fill" style="width:100%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">100%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">Sexo</span><div class="comp-track"><div class="comp-fill" style="width:100%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">100%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">Data Nasc.</span><div class="comp-track"><div class="comp-fill" style="width:100%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">100%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">CEP</span><div class="comp-track"><div class="comp-fill" style="width:100%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">100%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">Endereço</span><div class="comp-track"><div class="comp-fill" style="width:100%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">100%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">Telefone</span><div class="comp-track"><div class="comp-fill" style="width:100%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">100%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">Categoria</span><div class="comp-track"><div class="comp-fill" style="width:100%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">100%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">Matrícula</span><div class="comp-track"><div class="comp-fill" style="width:100%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">100%</span></div>
+    </div>
+
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:10px;padding:18px 20px;border-top:3px solid var(--yellow)">
+      <div style="font-weight:700;font-size:13px;color:var(--dark);margin-bottom:4px">Curitiba — Sócios</div>
+      <div style="font-size:10px;color:var(--gray);margin-bottom:14px">96 registros · Processo formal</div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">Nome</span><div class="comp-track"><div class="comp-fill" style="width:99%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">99%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">CPF</span><div class="comp-track"><div class="comp-fill" style="width:77%;background:var(--yellow)"></div></div><span class="comp-label" style="color:var(--yellow)">77,1%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">E-mail</span><div class="comp-track"><div class="comp-fill" style="width:85%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">85,4%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">Sexo</span><div class="comp-track"><div class="comp-fill" style="width:99%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">99%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">Data Nasc.</span><div class="comp-track"><div class="comp-fill" style="width:93%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">92,7%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">CEP</span><div class="comp-track"><div class="comp-fill" style="width:93%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">92,7%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">Endereço</span><div class="comp-track"><div class="comp-fill" style="width:95%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">94,8%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">Telefone</span><div class="comp-track"><div class="comp-fill" style="width:88%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">87,5%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">Categoria</span><div class="comp-track"><div class="comp-fill" style="width:99%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">99%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">Matrícula</span><div class="comp-track"><div class="comp-fill" style="width:89%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">88,5%</span></div>
+    </div>
+
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:10px;padding:18px 20px;border-top:3px solid var(--orange)">
+      <div style="font-weight:700;font-size:13px;color:var(--dark);margin-bottom:4px">Curitiba — Frequentadores</div>
+      <div style="font-size:10px;color:var(--gray);margin-bottom:14px">45 registros · Sem matrícula</div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">Nome</span><div class="comp-track"><div class="comp-fill" style="width:100%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">100%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">CPF</span><div class="comp-track"><div class="comp-fill" style="width:84%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">84,4%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">E-mail</span><div class="comp-track"><div class="comp-fill" style="width:87%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">86,7%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">Sexo</span><div class="comp-track"><div class="comp-fill" style="width:98%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">97,8%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">Data Nasc.</span><div class="comp-track"><div class="comp-fill" style="width:78%;background:var(--yellow)"></div></div><span class="comp-label" style="color:var(--yellow)">77,8%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">CEP</span><div class="comp-track"><div class="comp-fill" style="width:67%;background:var(--yellow)"></div></div><span class="comp-label" style="color:var(--yellow)">66,7%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">Endereço</span><div class="comp-track"><div class="comp-fill" style="width:78%;background:var(--yellow)"></div></div><span class="comp-label" style="color:var(--yellow)">77,8%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">Celular</span><div class="comp-track"><div class="comp-fill" style="width:64%;background:var(--red)"></div></div><span class="comp-label" style="color:var(--red)">64,4%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">Categoria</span><div class="comp-track"><div class="comp-fill" style="width:98%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">97,8%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">Matrícula</span><div class="comp-track"><div class="comp-fill" style="width:1%;background:var(--border)"></div></div><span class="comp-label" style="color:var(--gray)">0%</span></div>
+    </div>
+
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:10px;padding:18px 20px;border-top:3px solid var(--red)">
+      <div style="font-weight:700;font-size:13px;color:var(--dark);margin-bottom:4px">Fortaleza <span class="badge red" style="margin-left:6px">Atenção</span></div>
+      <div style="font-size:10px;color:var(--gray);margin-bottom:14px">109 sócios ativos</div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">Matrícula</span><div class="comp-track"><div class="comp-fill" style="width:100%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">100%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">Nome</span><div class="comp-track"><div class="comp-fill" style="width:100%;background:var(--green)"></div></div><span class="comp-label" style="color:var(--green)">100%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">Contato</span><div class="comp-track"><div class="comp-fill" style="width:75%;background:var(--yellow)"></div></div><span class="comp-label" style="color:var(--yellow)">75,2%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">E-mail</span><div class="comp-track"><div class="comp-fill" style="width:24%;background:var(--red)"></div></div><span class="comp-label" style="color:var(--red)">23,9%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">Endereço</span><div class="comp-track"><div class="comp-fill" style="width:24%;background:var(--red)"></div></div><span class="comp-label" style="color:var(--red)">23,9%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">Data Nasc.</span><div class="comp-track"><div class="comp-fill" style="width:20%;background:var(--red)"></div></div><span class="comp-label" style="color:var(--red)">20,2%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">CPF</span><div class="comp-track"><div class="comp-fill" style="width:1%;background:var(--border)"></div></div><span class="comp-label" style="color:var(--gray)">0%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">Sexo</span><div class="comp-track"><div class="comp-fill" style="width:1%;background:var(--border)"></div></div><span class="comp-label" style="color:var(--gray)">0%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">CEP</span><div class="comp-track"><div class="comp-fill" style="width:1%;background:var(--border)"></div></div><span class="comp-label" style="color:var(--gray)">0%</span></div>
+      <div class="comp-bar"><span style="font-size:10px;color:var(--gray);min-width:90px">Categoria</span><div class="comp-track"><div class="comp-fill" style="width:1%;background:var(--border)"></div></div><span class="comp-label" style="color:var(--gray)">0%</span></div>
+    </div>
+
+  </div>
+
+  <span class="st">Bases com avaliação qualitativa</span>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin-bottom:24px;">
+
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:10px;padding:18px 20px;border-top:3px solid var(--green)">
+      <div style="font-weight:700;font-size:13px;color:var(--dark);margin-bottom:4px">Recife <span class="badge green" style="margin-left:6px">Concluída</span></div>
+      <div style="font-size:10px;color:var(--gray);margin-bottom:14px">Vigentes confirmados · Modelo padrão adotado</div>
+      <div class="qual-row"><span class="qual-label">Nome</span><div class="qual-track"><div class="qual-bar" style="width:100%;background:var(--green);height:100%"></div></div><span class="qual-val" style="color:var(--green)">✓ Presente</span></div>
+      <div class="qual-row"><span class="qual-label">CPF</span><div class="qual-track"><div class="qual-bar" style="width:100%;background:var(--green);height:100%"></div></div><span class="qual-val" style="color:var(--green)">✓ Presente</span></div>
+      <div class="qual-row"><span class="qual-label">E-mail</span><div class="qual-track"><div class="qual-bar" style="width:100%;background:var(--green);height:100%"></div></div><span class="qual-val" style="color:var(--green)">✓ Presente</span></div>
+      <div class="qual-row"><span class="qual-label">Telefone</span><div class="qual-track"><div class="qual-bar" style="width:60%;background:var(--yellow);height:100%"></div></div><span class="qual-val" style="color:var(--yellow)">~ Parcial</span></div>
+      <div class="qual-row"><span class="qual-label">Categoria</span><div class="qual-track"><div class="qual-bar" style="width:100%;background:var(--green);height:100%"></div></div><span class="qual-val" style="color:var(--green)">✓ Presente</span></div>
+      <div class="qual-row"><span class="qual-label">Matrícula</span><div class="qual-track"><div class="qual-bar" style="width:100%;background:var(--green);height:100%"></div></div><span class="qual-val" style="color:var(--green)">✓ Presente</span></div>
+      <div style="margin-top:10px;padding:8px 10px;background:var(--light);border-radius:6px;font-size:10px;color:var(--gray);font-style:italic">Todos os registros confirmados como vigentes (26/05). Adotou modelo padrão com baixo atrito.</div>
+    </div>
+
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:10px;padding:18px 20px;border-top:3px solid var(--green)">
+      <div style="font-weight:700;font-size:13px;color:var(--dark);margin-bottom:4px">Belém <span class="badge green" style="margin-left:6px">Concluída</span></div>
+      <div style="font-size:10px;color:var(--gray);margin-bottom:14px">Planilha corrigida 26/05 · Modelo padrão</div>
+      <div class="qual-row"><span class="qual-label">Nome</span><div class="qual-track"><div class="qual-bar" style="width:100%;background:var(--green);height:100%"></div></div><span class="qual-val" style="color:var(--green)">✓ Presente</span></div>
+      <div class="qual-row"><span class="qual-label">CPF</span><div class="qual-track"><div class="qual-bar" style="width:100%;background:var(--green);height:100%"></div></div><span class="qual-val" style="color:var(--green)">✓ Presente</span></div>
+      <div class="qual-row"><span class="qual-label">E-mail</span><div class="qual-track"><div class="qual-bar" style="width:100%;background:var(--green);height:100%"></div></div><span class="qual-val" style="color:var(--green)">✓ Presente</span></div>
+      <div class="qual-row"><span class="qual-label">Telefone</span><div class="qual-track"><div class="qual-bar" style="width:60%;background:var(--yellow);height:100%"></div></div><span class="qual-val" style="color:var(--yellow)">~ Parcial</span></div>
+      <div class="qual-row"><span class="qual-label">Categoria</span><div class="qual-track"><div class="qual-bar" style="width:100%;background:var(--green);height:100%"></div></div><span class="qual-val" style="color:var(--green)">✓ Presente</span></div>
+      <div class="qual-row"><span class="qual-label">Matrícula</span><div class="qual-track"><div class="qual-bar" style="width:100%;background:var(--green);height:100%"></div></div><span class="qual-val" style="color:var(--green)">✓ Presente</span></div>
+      <div style="margin-top:10px;padding:8px 10px;background:var(--light);border-radius:6px;font-size:10px;color:var(--gray);font-style:italic">Inconsistência corrigida prontamente. Novo modelo padrão seguido sem necessidade de alteração no código.</div>
+    </div>
+
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:10px;padding:18px 20px;border-top:3px solid var(--green)">
+      <div style="font-weight:700;font-size:13px;color:var(--dark);margin-bottom:4px">São Paulo <span class="badge green" style="margin-left:6px">Concluída</span></div>
+      <div style="font-size:10px;color:var(--gray);margin-bottom:14px">Sócios efetivos recebidos 01/06</div>
+      <div class="qual-row"><span class="qual-label">Nome</span><div class="qual-track"><div class="qual-bar" style="width:100%;background:var(--green);height:100%"></div></div><span class="qual-val" style="color:var(--green)">✓ Presente</span></div>
+      <div class="qual-row"><span class="qual-label">CPF</span><div class="qual-track"><div class="qual-bar" style="width:100%;background:var(--green);height:100%"></div></div><span class="qual-val" style="color:var(--green)">✓ Presente</span></div>
+      <div class="qual-row"><span class="qual-label">E-mail</span><div class="qual-track"><div class="qual-bar" style="width:100%;background:var(--green);height:100%"></div></div><span class="qual-val" style="color:var(--green)">✓ Presente</span></div>
+      <div class="qual-row"><span class="qual-label">Categoria</span><div class="qual-track"><div class="qual-bar" style="width:60%;background:var(--yellow);height:100%"></div></div><span class="qual-val" style="color:var(--yellow)">~ Parcial</span></div>
+      <div class="qual-row"><span class="qual-label">Matrícula</span><div class="qual-track"><div class="qual-bar" style="width:100%;background:var(--green);height:100%"></div></div><span class="qual-val" style="color:var(--green)">✓ Presente</span></div>
+      <div style="margin-top:10px;padding:8px 10px;background:var(--light);border-radius:6px;font-size:10px;color:var(--gray);font-style:italic">Base completa recebida e integrada em 01/06. Estrutura com 5 abas não mapeadas — complexidade acima do esperado.</div>
+    </div>
+
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:10px;padding:18px 20px;border-top:3px solid var(--orange)">
+      <div style="font-weight:700;font-size:13px;color:var(--dark);margin-bottom:4px">Belo Horizonte <span class="badge orange" style="margin-left:6px">Dados mínimos</span></div>
+      <div style="font-size:10px;color:var(--gray);margin-bottom:14px">4 campos apenas · Complementação pendente</div>
+      <div class="qual-row"><span class="qual-label">Nome</span><div class="qual-track"><div class="qual-bar" style="width:100%;background:var(--green);height:100%"></div></div><span class="qual-val" style="color:var(--green)">✓ Presente</span></div>
+      <div class="qual-row"><span class="qual-label">CPF</span><div class="qual-track"><div class="qual-bar" style="width:1%;height:100%"></div></div><span class="qual-val" style="color:var(--red)">✗ Ausente</span></div>
+      <div class="qual-row"><span class="qual-label">E-mail</span><div class="qual-track"><div class="qual-bar" style="width:100%;background:var(--green);height:100%"></div></div><span class="qual-val" style="color:var(--green)">✓ Presente</span></div>
+      <div class="qual-row"><span class="qual-label">Data Nasc.</span><div class="qual-track"><div class="qual-bar" style="width:1%;height:100%"></div></div><span class="qual-val" style="color:var(--red)">✗ Ausente</span></div>
+      <div class="qual-row"><span class="qual-label">Endereço</span><div class="qual-track"><div class="qual-bar" style="width:1%;height:100%"></div></div><span class="qual-val" style="color:var(--red)">✗ Ausente</span></div>
+      <div class="qual-row"><span class="qual-label">Telefone</span><div class="qual-track"><div class="qual-bar" style="width:1%;height:100%"></div></div><span class="qual-val" style="color:var(--red)">✗ Ausente</span></div>
+      <div class="qual-row"><span class="qual-label">Categoria</span><div class="qual-track"><div class="qual-bar" style="width:1%;height:100%"></div></div><span class="qual-val" style="color:var(--red)">✗ Ausente</span></div>
+      <div class="qual-row"><span class="qual-label">Matrícula</span><div class="qual-track"><div class="qual-bar" style="width:100%;background:var(--green);height:100%"></div></div><span class="qual-val" style="color:var(--green)">✓ Presente</span></div>
+      <div style="margin-top:10px;padding:8px 10px;background:var(--light);border-radius:6px;font-size:10px;color:var(--gray);font-style:italic">Integração viabilizada pela chave e-mail. Complementação solicitada em 01/06 sem retorno.</div>
+    </div>
+
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:10px;padding:18px 20px;border-top:3px solid var(--red)">
+      <div style="font-weight:700;font-size:13px;color:var(--dark);margin-bottom:4px">Salvador <span class="badge red" style="margin-left:6px">Pendente</span></div>
+      <div style="font-size:10px;color:var(--gray);margin-bottom:14px">Dados NÃO entregues · Sistema sem exportação</div>
+      <div class="qual-row"><span class="qual-label">Nome</span><div class="qual-track"></div><span class="qual-val" style="color:var(--gray)">— n/d</span></div>
+      <div class="qual-row"><span class="qual-label">CPF</span><div class="qual-track"></div><span class="qual-val" style="color:var(--gray)">— n/d</span></div>
+      <div class="qual-row"><span class="qual-label">E-mail</span><div class="qual-track"></div><span class="qual-val" style="color:var(--gray)">— n/d</span></div>
+      <div class="qual-row"><span class="qual-label">Todos</span><div class="qual-track"></div><span class="qual-val" style="color:var(--gray)">— n/d</span></div>
+      <div style="margin-top:10px;padding:8px 10px;background:#FEF2F2;border-radius:6px;font-size:10px;color:#7F1D1D;font-style:italic">Nenhum dado disponível. Sistema gerido por fornecedor terceiro sem exportação nativa. Necessária decisão institucional.</div>
+    </div>
+
+  </div>
+  <div class="box-yellow"><strong>Impacto:</strong> Registros sem e-mail não recebem comunicação de ativação dos serviços digitais. Sem CPF, o associado não pode ser validado contra a base da Fenasbac. Fortaleza e Belo Horizonte terão experiência limitada no Clube F.</div>
+</div>
+
+<!-- ══ COMPLEXIDADES ══ -->
+<div class="panel" id="panel-complexidades">
+  <div class="box-blue">Complexidades técnicas identificadas ao longo do processo de integração com as 8 regionais, com classificação de impacto. Serve de base para o planejamento técnico das próximas atualizações e da estratégia federativa de dados.</div>
+  <span class="st">Complexidades por Impacto</span>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Complexidade</th><th>Regionais</th><th>Descrição</th><th>Impacto</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Ausência total de CPF</strong></td><td>Fortaleza, BH</td><td>Impossibilita deduplicação robusta e validação de identidade. Integração via e-mail ou matrícula como chave alternativa.</td><td><span class="badge red">Alto</span></td></tr>
+        <tr><td><strong>E-mail baixa completude</strong></td><td>Fortaleza (23,9%)</td><td>Comunicação digital comprometida para ~76% dos associados. Impacto direto na ativação de serviços digitais.</td><td><span class="badge red">Alto</span></td></tr>
+        <tr><td><strong>Sistema sem exportação nativa</strong></td><td>Salvador</td><td>Necessidade de nova rotina pelo fornecedor. Prazo indefinido. Risco de bloqueio permanente.</td><td><span class="badge red">Alto</span></td></tr>
+        <tr><td><strong>Dependência de processo manual</strong></td><td>Salvador, Fortaleza</td><td>Sem sistema estruturado — qualquer atualização futura será manual, cara e propensa a erros.</td><td><span class="badge red">Alto</span></td></tr>
+        <tr><td><strong>Planilha fora do padrão</strong></td><td>Curitiba, SP</td><td>Estruturas incompatíveis com o modelo de importação. Transformação manual necessária.</td><td><span class="badge yellow">Médio</span></td></tr>
+        <tr><td><strong>Campos obrigatórios ausentes</strong></td><td>FOR, BH, CWB (parcial)</td><td>Data nasc., endereço, CEP e categoria ausentes comprometem o perfil do associado no Conecta.</td><td><span class="badge yellow">Médio</span></td></tr>
+        <tr><td><strong>Categorias heterogêneas</strong></td><td>Todas</td><td>Cada regional nomeia categorias de forma diferente. Mapeamento semântico federativo necessário.</td><td><span class="badge yellow">Médio</span></td></tr>
+        <tr><td><strong>Matrícula ausente (frequentadores)</strong></td><td>Curitiba, BH</td><td>Impossibilita vinculação pela chave padrão. Integração via e-mail aumenta complexidade.</td><td><span class="badge yellow">Médio</span></td></tr>
+        <tr><td><strong>Processos manuais sem validação</strong></td><td>Belém, Curitiba</td><td>Inconsistência entre abas (Belém) e CPF com formatação inconsistente (Curitiba).</td><td><span class="badge yellow">Médio</span></td></tr>
+        <tr><td><strong>Dados desatualizados pós-integração</strong></td><td>Todas (risco)</td><td>Sem processo de atualização recorrente formalizado, as bases integradas se desatualizam progressivamente.</td><td><span class="badge yellow">Médio</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ RECOMENDAÇÕES ══ -->
+<div class="panel" id="panel-recomendacoes">
+  <span class="st">Percepções da Equipe Técnica</span>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:12px;margin-bottom:24px;">
+
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:10px;padding:18px 20px;border-left:4px solid var(--blue)">
+      <div style="font-weight:700;font-size:13px;color:var(--dark);margin-bottom:8px;display:flex;align-items:center;gap:8px"><span style="font-size:18px">📊</span> Maturidade Digital da Rede</div>
+      <div style="font-size:12px;color:var(--gray);line-height:1.8">A maturidade digital da rede ASBAC está em <strong style="color:var(--dark)">estágio inicial</strong>. O uso de planilhas Excel como único instrumento de gestão cadastral é universal — nenhuma regional possui sistema dedicado de CRM ou ERP em pleno funcionamento. A exceção relativa é Salvador, que possui um sistema terceirizado cuja limitação técnica para exportação é, paradoxalmente, uma barreira maior do que a ausência de qualquer sistema.</div>
+    </div>
+
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:10px;padding:18px 20px;border-left:4px solid var(--orange)">
+      <div style="font-weight:700;font-size:13px;color:var(--dark);margin-bottom:8px;display:flex;align-items:center;gap:8px"><span style="font-size:18px">🏛</span> Governança dos Dados</div>
+      <div style="font-size:12px;color:var(--gray);line-height:1.8">A governança é <strong style="color:var(--dark)">descentralizada, informal e dependente de pessoas-chave</strong>. Não há processos documentados de atualização cadastral nem critérios mínimos de completude. A melhor evidência: Porto Alegre com 100% de e-mail e Fortaleza com 23,9% — ambas no mesmo contexto institucional. A ausência de governança gerou: inconsistência entre abas (Belém), CPF em múltiplos formatos (Curitiba), campos obrigatórios ausentes sem consciência da lacuna (Fortaleza, BH) e categorias nomeadas de forma livre sem padrão federativo.</div>
+    </div>
+
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:10px;padding:18px 20px;border-left:4px solid var(--yellow)">
+      <div style="font-weight:700;font-size:13px;color:var(--dark);margin-bottom:8px;display:flex;align-items:center;gap:8px"><span style="font-size:18px">🔧</span> Capacidade de Evolução Tecnológica</div>
+      <div style="font-size:12px;color:var(--gray);line-height:1.8">As regionais demonstram <strong style="color:var(--dark)">abertura para evoluir, mas dependem de orientação e suporte da Fenasbac</strong>. O padrão é claro: quando a Fenasbac entrega um modelo claro e acompanha de perto, as regionais respondem positivamente — evidenciado por Recife e Belém, que adotaram o novo modelo rapidamente. O maior risco é a ausência de recursos humanos dedicados à gestão de dados: em vários casos, a pessoa responsável acumulava múltiplas funções operacionais.</div>
+    </div>
+
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:10px;padding:18px 20px;border-left:4px solid var(--red)">
+      <div style="font-weight:700;font-size:13px;color:var(--dark);margin-bottom:8px;display:flex;align-items:center;gap:8px"><span style="font-size:18px">⚠</span> Desafios para Visão Federativa</div>
+      <div style="font-size:12px;color:var(--gray);line-height:1.8">
+        <div style="margin-bottom:6px">• Heterogeneidade de campos e categorias exige mapeamento semântico contínuo</div>
+        <div style="margin-bottom:6px">• Atualização das bases será manual e fragmentada enquanto não houver sistema integrado</div>
+        <div style="margin-bottom:6px">• Sem processo recorrente, as bases integradas se desatualizam progressivamente</div>
+        <div style="margin-bottom:6px">• Salvador representa risco estrutural — sem ação interna, a integração pode não acontecer</div>
+        <div>• Fortaleza: a Fenasbac possui mais dados dos associados desta regional do que a própria ASBAC local</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="background:#F0FBF3;border-left:4px solid var(--green);border-radius:0 10px 10px 0;padding:18px 20px;margin-bottom:24px">
+    <div style="font-weight:700;font-size:14px;color:#155724;margin-bottom:12px">🔄 Inversão de Fluxo — Oportunidade Estratégica</div>
+    <div style="font-size:12px;color:#155724;line-height:1.8;margin-bottom:14px">A Fenasbac tem condições de se posicionar como o <strong>repositório federativo de referência</strong> — mais completo e atualizado do que as bases locais das ASBACs. Em vez de apenas receber dados, a Fenasbac pode se tornar a fonte que retroalimenta as regionais. Essa inversão de fluxo é estratégica e o Conecta é a plataforma que viabiliza isso.</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">
+      <div style="background:rgba(255,255,255,.75);border-radius:8px;padding:12px;font-size:11px;line-height:1.6;color:#155724"><strong>Canal técnico aberto</strong><br>O processo criou relacionamento técnico com todas as ASBACs — aproveitável para futuras iniciativas de capacitação e integração</div>
+      <div style="background:rgba(255,255,255,.75);border-radius:8px;padding:12px;font-size:11px;line-height:1.6;color:#155724"><strong>Template federativo</strong><br>O modelo de planilha demonstrou eficácia — pode ser formalizado como política institucional com impacto imediato</div>
+      <div style="background:rgba(255,255,255,.75);border-radius:8px;padding:12px;font-size:11px;line-height:1.6;color:#155724"><strong>Reunião do Conselho 11/06</strong><br>Janela estratégica para apresentar diagnóstico e obter mandato para política federativa de dados da rede ASBAC</div>
+    </div>
+  </div>
+
+  <span class="st">Recomendações por Horizonte</span>
+  <div class="rec-grid" style="margin-bottom:24px;">
+    <div class="rec-card">
+      <div class="rec-head"><div class="rec-icon" style="background:#EFF6FF;font-size:20px">⚡</div><div><div class="rec-title">Curto Prazo</div><div class="rec-period">Imediato — até jun/2026</div></div></div>
+      <ul class="rec-list">
+        <li>Complementar dados de BH (CPF, data nasc., telefone) com suporte ativo da TI</li>
+        <li>Acompanhar Salvador sobre desenvolvimento da rotina de extração com o fornecedor</li>
+        <li>Formalizar template de planilha como padrão federativo oficial</li>
+        <li>Estabelecer periodicidade de atualização das bases — mínimo semestral</li>
+        <li>Criar documentação de onboarding de dados para novas integrações</li>
+      </ul>
+    </div>
+    <div class="rec-card">
+      <div class="rec-head"><div class="rec-icon" style="background:#FFFBEB;font-size:20px">📊</div><div><div class="rec-title">Médio Prazo</div><div class="rec-period">Jul–dez/2026</div></div></div>
+      <ul class="rec-list">
+        <li>Política formal de qualidade de dados — critérios mínimos de completude</li>
+        <li>Taxonomia federativa de categorias — mapeamento semântico entre regionais</li>
+        <li>Indicadores de qualidade cadastral por regional no dashboard de TI</li>
+        <li>Avaliar interface de atualização direta no Conecta sem planilha</li>
+        <li>Capacitar pontos focais das regionais em gestão de dados</li>
+      </ul>
+    </div>
+    <div class="rec-card">
+      <div class="rec-head"><div class="rec-icon" style="background:#F0FBF3;font-size:20px">🚀</div><div><div class="rec-title">Longo Prazo</div><div class="rec-period">2027+</div></div></div>
+      <ul class="rec-list">
+        <li>Conecta como repositório federativo único de identidade digital</li>
+        <li>Integrações sistêmicas via API com regionais com infraestrutura adequada</li>
+        <li>Para Salvador: avaliar financiamento de rotina de extração</li>
+        <li>Eliminar progressivamente dependência de planilhas manuais</li>
+        <li>Estratégia de transformação digital da rede ASBAC apoiada pela Fenasbac</li>
+      </ul>
+    </div>
+  </div>
+
+  <span class="st">Próximas Ações Críticas</span>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Prazo</th><th>Ação</th><th>Responsável</th><th>Prioridade</th></tr></thead>
+      <tbody>
+        <tr><td><strong style="color:var(--red)">Urgente</strong></td><td>BH: suporte ativo para complementação de dados (CPF, telefone, data nasc.)</td><td>TI (Lenita)</td><td><span class="badge red">Urgente</span></td></tr>
+        <tr><td><strong style="color:var(--red)">Urgente</strong></td><td>Salvador: retomar acompanhamento sobre avanço com fornecedor terceirizado</td><td>TI (Lenita)</td><td><span class="badge red">Urgente</span></td></tr>
+        <tr><td><strong>11/06</strong></td><td>Apresentar diagnóstico ASABCs à Diretoria na Reunião do Conselho</td><td>TI / Parcerias</td><td><span class="badge blue">Estratégico</span></td></tr>
+        <tr><td><strong>Jun/2026</strong></td><td>Formalizar template federativo e comunicar a todas as ASBACs</td><td>TI / Parcerias</td><td><span class="badge yellow">Alta</span></td></tr>
+        <tr><td><strong>Jul/2026</strong></td><td>Iniciar política formal de qualidade de dados — critérios mínimos por campo</td><td>TI / Dir. / Parcerias</td><td><span class="badge yellow">Alta</span></td></tr>
+        <tr><td><strong>Jul/2026</strong></td><td>Taxonomia federativa de categorias — mapeamento semântico entre regionais</td><td>TI</td><td><span class="badge gray">Média</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</div>
+
+<footer class="page-footer">
+  <span>SBS Quadra 02, Bloco A, Ed. Casa de São Paulo, 7º andar — Brasília/DF  |  Fenasbac — Coordenação de TI · Lenita Martins / Wesley Aquiles / Alân Domingues</span>
+  <span>Diagnóstico Bases ASABCs · Programa 60 Anos · Junho de 2026 · v4.0 · Uso interno</span>
+</footer>
+
+<script>
+function showTab(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    document.querySelectorAll('.pbf').forEach(function(b) {
+      var w = b.style.width; b.style.width = '0';
+      setTimeout(function() { b.style.width = w; }, 120);
+    });
+  }, 200);
+});
+</script>
+</body>
+</html>
