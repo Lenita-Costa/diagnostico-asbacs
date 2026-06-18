@@ -140,6 +140,18 @@ tbody td{padding:10px 12px;color:var(--dark);vertical-align:middle;line-height:1
 ::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-thumb{background:var(--blue);border-radius:3px;}
 
+/* RESPONSIVO */
+@media (max-width:760px){
+  .wrap{padding:18px 16px 44px;}
+  .rec-grid{grid-template-columns:1fr;}
+  .rec-cards{grid-template-columns:1fr !important;}
+}
+@media (max-width:480px){
+  .wrap{padding:14px 12px 36px;}
+  .rec-card{padding:14px 16px;}
+  .st{margin:18px 0 12px;}
+}
+
 </style>
 </head>
 <body>
@@ -841,7 +853,7 @@ tbody td{padding:10px 12px;color:var(--dark);vertical-align:middle;line-height:1
 
 <div class="panel" id="panel-recomendacoes">
   <span class="st">Pontos em Aberto para Alinhamento</span>
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:12px;margin-bottom:24px;">
+  <div class="rec-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:12px;margin-bottom:24px;">
     <div style="background:var(--white);border:1px solid var(--border);border-radius:10px;padding:16px 18px;border-left:4px solid var(--blue)">
       <div style="font-weight:700;font-size:12px;color:var(--dark);margin-bottom:6px">Deliberações da Reunião do Conselho (11/06)</div>
       <div style="font-size:11px;color:var(--gray);line-height:1.6">Registro pendente: incluir aqui as decisões e encaminhamentos definidos na reunião sobre a política federativa de dados da rede ASBAC. Campo a preencher após consolidação da ata.</div>
@@ -857,7 +869,7 @@ tbody td{padding:10px 12px;color:var(--dark);vertical-align:middle;line-height:1
   </div>
 
   <span class="st">Percepções da Equipe Técnica</span>
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:12px;margin-bottom:24px;">
+  <div class="rec-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:12px;margin-bottom:24px;">
 
     <div style="background:var(--white);border:1px solid var(--border);border-radius:10px;padding:18px 20px;border-left:4px solid var(--blue)">
       <div style="font-weight:700;font-size:13px;color:var(--dark);margin-bottom:8px;display:flex;align-items:center;gap:8px"><span style="font-size:18px">📊</span> Maturidade Digital da Rede</div>
@@ -890,7 +902,7 @@ tbody td{padding:10px 12px;color:var(--dark);vertical-align:middle;line-height:1
   <div style="background:#F0FBF3;border-left:4px solid var(--green);border-radius:0 10px 10px 0;padding:18px 20px;margin-bottom:24px">
     <div style="font-weight:700;font-size:14px;color:#155724;margin-bottom:12px">🔄 Inversão de Fluxo — Oportunidade Estratégica</div>
     <div style="font-size:12px;color:#155724;line-height:1.8;margin-bottom:14px">A Fenasbac tem condições de se posicionar como o <strong>repositório federativo de referência</strong> — mais completo e atualizado do que as bases locais das ASBACs. Em vez de apenas receber dados, a Fenasbac pode se tornar a fonte que retroalimenta as regionais. Essa inversão de fluxo é estratégica e o Conecta é a plataforma que viabiliza isso.</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">
+    <div class="rec-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">
       <div style="background:rgba(255,255,255,.75);border-radius:8px;padding:12px;font-size:11px;line-height:1.6;color:#155724"><strong>Canal técnico aberto</strong><br>O processo criou relacionamento técnico com todas as ASBACs — aproveitável para futuras iniciativas de capacitação e integração</div>
       <div style="background:rgba(255,255,255,.75);border-radius:8px;padding:12px;font-size:11px;line-height:1.6;color:#155724"><strong>Template federativo</strong><br>O modelo de planilha demonstrou eficácia — pode ser formalizado como política institucional com impacto imediato</div>
       <div style="background:rgba(255,255,255,.75);border-radius:8px;padding:12px;font-size:11px;line-height:1.6;color:#155724"><strong>Reunião do Conselho — realizada em 11/06</strong><br>Diagnóstico apresentado à Diretoria em 11/06/2026. Acompanhar deliberações e próximos passos definidos na reunião.</div>
